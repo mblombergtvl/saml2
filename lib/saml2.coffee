@@ -129,19 +129,19 @@ format_pem = (key, type) ->
   return key if (/-----BEGIN [0-9A-Z ]+-----[^-]*-----END [0-9A-Z ]+-----/g.exec(key))?
   return "-----BEGIN #{type.toUpperCase()}-----\n" + key.match(/.{1,64}/g).join("\n") + "\n-----END #{type.toUpperCase()}-----"
 
-# Takes a compressed/base64 enoded @saml_request and @private_key and signs the request using RSA-SHA256. It returns
+# Takes a compressed/base64 enoded @saml_request and @private_key and signs the request using RSA-SHA1. It returns
 # the result as an object containing the query parameters.
 sign_request = (saml_request, private_key, relay_state, response=false) ->
   action = if response then "SAMLResponse" else "SAMLRequest"
   data = "#{action}=" + encodeURIComponent(saml_request)
   if relay_state
     data += "&RelayState=" + encodeURIComponent(relay_state)
-  data += "&SigAlg=" + encodeURIComponent('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256')
+  data += "&SigAlg=" + encodeURIComponent('http://www.w3.org/2000/09/xmldsig#rsa-sha1')
 
   saml_request_data = "#{action}=" + encodeURIComponent(saml_request)
   relay_state_data = if relay_state? then "&RelayState=" + encodeURIComponent(relay_state) else ""
-  sigalg_data = "&SigAlg=" + encodeURIComponent('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256')
-  sign = crypto.createSign 'RSA-SHA256'
+  sigalg_data = "&SigAlg=" + encodeURIComponent('http://www.w3.org/2000/09/xmldsig#rsa-sha1')
+  sign = crypto.createSign 'RSA-SHA1'
   sign.update(saml_request_data + relay_state_data + sigalg_data)
 
   samlQueryString = {}
@@ -154,7 +154,7 @@ sign_request = (saml_request, private_key, relay_state, response=false) ->
   if relay_state
     samlQueryString.RelayState = relay_state
 
-  samlQueryString.SigAlg = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+  samlQueryString.SigAlg = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
   samlQueryString.Signature = sign.sign(format_pem(private_key, 'PRIVATE KEY'), 'base64')
 
   samlQueryString
@@ -183,7 +183,7 @@ extract_certificate_data = (certificate) ->
 check_saml_signature = (xml, certificate) ->
   doc = (new xmldom.DOMParser()).parseFromString(xml)
 
-  signature = xmlcrypto.xpath(doc, "./*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']")
+  signature = xmlcrypto.xpath(doc, "//*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']")
   return null unless signature.length is 1
   sig = new xmlcrypto.SignedXml()
   sig.keyInfoProvider = getKey: -> format_pem(certificate, 'CERTIFICATE')
