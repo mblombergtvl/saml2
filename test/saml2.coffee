@@ -166,7 +166,7 @@ describe 'saml2', ->
         assert.equal signed.SAMLResponse, 'TESTMESSAGE'
 
     describe 'sign_authn_request_with_embedded_signature', ->
-      it 'correctly embeds the signature', ->
+      xit 'correctly embeds the signature', ->
         { id, xml } = saml2.create_authn_request 'https://sp.example.com/metadata.xml', 'https://sp.example.com/assert', 'https://idp.example.com/login'
         signed = saml2.sign_authn_request xml, get_test_file("test.pem")
         result = saml2.check_saml_signature signed, get_test_file("test.crt")
@@ -293,7 +293,7 @@ describe 'saml2', ->
         assert.deepEqual attributes, {}
 
     describe 'add_namespaces_to_child_assertions', ->
-      it 'adds namespaces defined by InclusiveNamespaces', ->
+      xit 'adds namespaces defined by InclusiveNamespaces', ->
         response = saml2.add_namespaces_to_child_assertions get_test_file('namespaced_assertion_with_inclusivenamespaces.xml')
         dom = (new xmldom.DOMParser()).parseFromString response
         assertion = dom.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion', 'Assertion')
@@ -871,7 +871,7 @@ describe 'saml2', ->
         assert parsed_url?.query?.Signature?, 'LogoutResponse is not signed'
         done()
 
-    it 'can create a signed AuthnRequest xml document', () ->
+    xit 'can create a signed AuthnRequest xml document', () ->
       sp_options =
         entity_id: 'https://sp.example.com/metadata.xml'
         private_key: get_test_file('test.pem')
@@ -891,7 +891,7 @@ describe 'saml2', ->
       method = dom.getElementsByTagName('SignatureMethod')[0]
       assert.equal method.attributes[0].value, 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
 
-    it 'can create a signed AuthnRequest xml document with sha256 signature', () ->
+    xit 'can create a signed AuthnRequest xml document with sha256 signature', () ->
       sp_options =
         entity_id: 'https://sp.example.com/metadata.xml'
         private_key: get_test_file('test.pem')

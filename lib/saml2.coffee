@@ -18,7 +18,8 @@ XMLNS =
   MD: 'urn:oasis:names:tc:SAML:2.0:metadata'
   DS: 'http://www.w3.org/2000/09/xmldsig#'
   XENC: 'http://www.w3.org/2001/04/xmlenc#'
-  EXC_C14N: 'http://www.w3.org/2001/10/xml-exc-c14n#'
+  EXC_C14N: 'http://www.w3.org/2001/10/xml-exc-c14n#',
+  C14N: 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315#'
 
 class SAMLError extends Error
   constructor: (@message, @extra) ->
@@ -54,7 +55,7 @@ create_authn_request = (issuer, assert_endpoint, destination, force_authn, conte
 # Adds an embedded signature to a previously generated AuthnRequest
 sign_authn_request = (xml, private_key, options) ->
   signer = new SignedXml null, options
-  signer.addReference "//*[local-name(.)='AuthnRequest']", ['http://www.w3.org/2000/09/xmldsig#enveloped-signature','http://www.w3.org/2001/10/xml-exc-c14n#']
+  signer.addReference "//*[local-name(.)='AuthnRequest']", ['http://www.w3.org/2000/09/xmldsig#enveloped-signature','http://www.w3.org/TR/2001/REC-xml-c14n-20010315#']
   signer.signingKey = private_key
   signer.computeSignature xml
   return signer.getSignedXml()
@@ -404,7 +405,7 @@ add_namespaces_to_child_assertions = (xml_string) ->
     return xml_string if assertion_elements.length isnt 1
     assertion_element = assertion_elements[0]
 
-    inclusive_namespaces = assertion_element.getElementsByTagNameNS(XMLNS.EXC_C14N, 'InclusiveNamespaces')[0]
+    inclusive_namespaces = assertion_element.getElementsByTagNameNS(XMLNS.C14N, 'InclusiveNamespaces')[0]
     namespaces = if inclusive_namespaces and prefixList = inclusive_namespaces.getAttribute('PrefixList')?.trim()
       ("xmlns:#{ns}" for ns in prefixList.split(' '))
     else
