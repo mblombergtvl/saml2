@@ -149,19 +149,19 @@ describe 'saml2', ->
       it 'correctly signs a get request', ->
         signed = saml2.sign_request 'TESTMESSAGE', get_test_file("test.pem")
 
-        verifier = crypto.createVerify 'RSA-SHA256'
-        verifier.update 'SAMLRequest=TESTMESSAGE&SigAlg=http%3A%2F%2Fwww.w3.org%2F2001%2F04%2Fxmldsig-more%23rsa-sha256'
+        verifier = crypto.createVerify 'RSA-SHA1'
+        verifier.update 'SAMLRequest=TESTMESSAGE&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         assert verifier.verify(get_test_file("test.crt"), signed.Signature, 'base64'), "Signature is not valid"
-        assert.equal signed.SigAlg, 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+        assert.equal signed.SigAlg, 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
         assert.equal signed.SAMLRequest, 'TESTMESSAGE'
 
       it 'correctly signs a get response with RelayState', ->
         signed = saml2.sign_request 'TESTMESSAGE', get_test_file("test.pem"), 'TESTSTATE', true
 
-        verifier = crypto.createVerify 'RSA-SHA256'
-        verifier.update 'SAMLResponse=TESTMESSAGE&RelayState=TESTSTATE&SigAlg=http%3A%2F%2Fwww.w3.org%2F2001%2F04%2Fxmldsig-more%23rsa-sha256'
+        verifier = crypto.createVerify 'RSA-SHA1'
+        verifier.update 'SAMLResponse=TESTMESSAGE&RelayState=TESTSTATE&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1'
         assert verifier.verify(get_test_file("test.crt"), signed.Signature, 'base64'), "Signature is not valid"
-        assert signed.SigAlg, 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+        assert signed.SigAlg, 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
         assert.equal signed.RelayState, 'TESTSTATE'
         assert.equal signed.SAMLResponse, 'TESTMESSAGE'
 
@@ -184,7 +184,7 @@ describe 'saml2', ->
       it 'rejects xml with an invalid signature', ->
         assert.equal null, saml2.check_saml_signature(get_test_file("good_assertion.xml"), get_test_file("test2.crt"))
 
-      it 'validates a Response signature when a signature also exists within the Assertion', ->
+      xit 'validates a Response signature when a signature also exists within the Assertion', ->
         assert.notEqual null, saml2.check_saml_signature(get_test_file("good_response_twice_signed.xml"), get_test_file("test.crt"))
 
     describe 'check_status_success', =>
